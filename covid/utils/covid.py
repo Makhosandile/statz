@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 
 confirmed = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data' \
             '/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv '
@@ -24,47 +23,47 @@ confirmed = confirmed.rename(columns={'Country/Region': 'Country'})
 class GlobalCases:
     def confirmed(self):
         df = confirmed.iloc[:, 4:].sum().max()
-        df = pd.DataFrame({'Confirmed': [df]})
+        df = {'Confirmed': int(df)}
         return df
 
     def deaths(self):
         df = deaths.iloc[:, 4:].sum().max()
-        df = pd.DataFrame({'Deaths': [df]})
+        df = {'Deaths': int(df)}
         return df
 
     def recovered(self):
         df = recovered.iloc[:, 4:].sum().max()
-        df = pd.DataFrame({'Recovered': [df]})
+        df = {'Recovered': int(df)}
         return df
 
     def active(self):
         df = GlobalCases.confirmed(self)['Confirmed'] - GlobalCases.deaths(self)['Deaths'] \
              - GlobalCases.recovered(self)['Recovered']
-        df = pd.DataFrame({'Active': df}, index=[0])
+        df = {'Active': int(df)}
         return df
 
     def complete_world(self):
-        df = pd.DataFrame({
-            'Confirmed': [GlobalCases.confirmed(self)],
-            'Deaths': [GlobalCases.deaths(self)],
-            'Recovered': [GlobalCases.recovered(self)],
-            'Active': [GlobalCases.active(self)]
-        })
+        df = {
+            'Confirmed': GlobalCases.confirmed(self),
+            'Deaths': GlobalCases.deaths(self),
+            'Recovered': GlobalCases.recovered(self),
+            'Active': GlobalCases.active(self)
+        }
         return df
 
     def death_rate(self=None):
         df = GlobalCases.deaths(self)['Deaths'] / GlobalCases.confirmed(self)['Confirmed'] * 100
-        df = pd.DataFrame({'Death Rate': df}, index=[0])
+        df = {'Death Rate': float(df)}
         return df
 
     def recovery_rate(self):
         df = GlobalCases.recovered(self)['Recovered'] / GlobalCases.confirmed(self)['Confirmed'] * 100
-        df = pd.DataFrame({'Recovery Rate': df}, index=[0])
+        df = {'Recovery Rate': float(df)}
         return df
 
     def active_perc(self):
         df = GlobalCases.active(self)['Active'] / GlobalCases.confirmed(self)['Confirmed'] * 100
-        df = pd.DataFrame({'Active Percantage': df}, index=[0])
+        df = {'Active Percantage': float(df)}
         return df
 
     def daily_confirmed(self):
@@ -72,9 +71,8 @@ class GlobalCases:
         df.index = pd.to_datetime(df.index)
         df = pd.DataFrame(df).reset_index()
         df.columns = ['Date', 'Confirmed']
-        # df['7 Day Change'] = df['Confirmed'].pct_change(periods=7)
-        # df /= 1_000_000
-        return df
+        #df["Confirmed"].astype(int)
+        return df.to_dict()
 
     def daily_deaths(self):
         df = deaths.iloc[:, 3:].sum(axis=0)
@@ -83,7 +81,7 @@ class GlobalCases:
         df.columns = ['Date', 'Deaths']
         # df['7 Day Change'] = df['Deaths'].pct_change(periods=7)
         # df /= 1_000_000
-        return df
+        return df.to_dict()
 
     def daily_recovered(self):
         df = recovered.iloc[:, 3:].sum(axis=0)
@@ -92,7 +90,7 @@ class GlobalCases:
         df.columns = ['Date', 'Recovered']
         # df['7 Day Change'] = df['Recovered'].pct_change(periods=7)
         # df /= 1_000_000
-        return df
+        return df.to_dict()
 
     def daily_active(self):
         df = (confirmed.iloc[:, 3:].sum(axis=0)) - (deaths.iloc[:, 3:].sum(axis=0)) - (
@@ -102,7 +100,7 @@ class GlobalCases:
         df.columns = ['Date', 'Active']
         # df['7 Day Change'] = df.rolling(window=7).mean()
         # df['7 Day Change'] = df['Active'].pct_change(periods=7)
-        return df
+        return df.to_dict()
 
 
 df_confirmed = confirmed.groupby('Country').sum().reset_index()
